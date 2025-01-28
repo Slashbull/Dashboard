@@ -1,10 +1,6 @@
-# importer_dashboard/core/__init__.py
-# This allows: from core import load_and_preprocess_data, authenticate_user, logout_user
-# Instead of: from core.core import load_and_preprocess_data, etc.
+"""
+Core module for data preprocessing, filtering, and security.
+"""
 from .core import load_and_preprocess_data
+from .filters import apply_filters, generate_filter_options, get_active_filters
 from .security import authenticate_user, logout_user
-__all__ = [
-    "load_and_preprocess_data",
-    "authenticate_user",
-    "logout_user",
-]
