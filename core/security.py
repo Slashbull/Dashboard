@@ -2,9 +2,8 @@
 
 import streamlit as st
 
-# Example credentials (In production, store securely!)
 USER_CREDENTIALS = {
-    "admin": "password123",
+    "admin": "password123",  # Example
     "user": "userpass"
 }
 
@@ -24,7 +23,7 @@ def authenticate_user():
             st.sidebar.error("Invalid username or password.")
             return False
     
-    # If the user already logged in this session
+    # If already authenticated this session
     if "authenticated" in st.session_state and st.session_state["authenticated"]:
         return True
     
