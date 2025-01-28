@@ -5,3 +5,4 @@ plotly
 dask
 chardet
 gspread
+oauth2client
