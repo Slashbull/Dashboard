@@ -1,7 +1,3 @@
-import pandas as pd
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-
 def load_and_preprocess_data(file=None, google_sheet_url=None):
     """
     Load and preprocess data from a file or Google Sheet.
@@ -32,22 +28,30 @@ def load_and_preprocess_data(file=None, google_sheet_url=None):
         else:
             raise ValueError("No data source provided.")
 
-        # Clean column names
+        # Clean column names (case-insensitive)
+        data.columns = data.columns.str.strip().str.title()  # Normalize column names
         data.rename(columns={
             'Consignee State': 'State',
             'Quanity': 'Quantity',
             'Job No.': 'Job_Number'
         }, inplace=True)
 
-        # Add a Quarter column based on the Month column
-        month_to_quarter = {
-            'Jan': 'Q1', 'Feb': 'Q1', 'Mar': 'Q1',
-            'Apr': 'Q2', 'May': 'Q2', 'Jun': 'Q2',
-            'Jul': 'Q3', 'Aug': 'Q3', 'Sep': 'Q3',
-            'Oct': 'Q4', 'Nov': 'Q4', 'Dec': 'Q4'
-        }
+        # Add a Quarter column if 'Month' exists
         if 'Month' in data.columns:
-            data['Quarter'] = data['Month'].str.strip().str.title().map(month_to_quarter)
+            month_to_quarter = {
+                'Jan': 'Q1', 'Feb': 'Q1', 'Mar': 'Q1',
+                'Apr': 'Q2', 'May': 'Q2', 'Jun': 'Q2',
+                'Jul': 'Q3', 'Aug': 'Q3', 'Sep': 'Q3',
+                'Oct': 'Q4', 'Nov': 'Q4', 'Dec': 'Q4'
+            }
+            data['Quarter'] = (
+                data['Month']
+                .str.strip()  # Remove leading/trailing spaces
+                .str.title()  # Normalize month names (e.g., 'jan' -> 'Jan')
+                .map(month_to_quarter)  # Map to quarters
+            )
+        else:
+            st.warning("No 'Month' column found. Skipping quarter calculation.")
 
         # Clean the Quantity column
         if 'Quantity' in data.columns:
@@ -59,6 +63,8 @@ def load_and_preprocess_data(file=None, google_sheet_url=None):
                 .replace('', '0')  # Replace empty strings with '0'
                 .astype(float)  # Convert to float
             )
+        else:
+            st.warning("No 'Quantity' column found. Skipping quantity cleaning.")
 
         return data
 
