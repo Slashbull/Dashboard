@@ -6,6 +6,11 @@ from core.security import authenticate_user, logout_user
 from submodules.anomaly_detection import detect_anomalies
 import plotly.express as px
 
+import sys
+
+st.write("Python executable:", sys.executable)
+st.write("Python version:", sys.version)
+
 def main():
     st.set_page_config(page_title="Importer Dashboard 360°", layout="wide")
 
