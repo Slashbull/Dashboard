@@ -1,4 +1,6 @@
 import pandas as pd
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
 def load_and_preprocess_data(file=None, google_sheet_url=None):
     """
