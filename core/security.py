@@ -1,5 +1,3 @@
-# importer_dashboard/core/security.py
-
 import streamlit as st
 
 USER_CREDENTIALS = {
