@@ -5,7 +5,7 @@ from core.filters import apply_filters, generate_filter_options, get_active_filt
 from dashboards.market_overview import market_overview
 
 def main():
-    st.set_page_config(page_title="Importer Dashboard 360°", layout="wide")
+    st.set_page_config(page_title="Importer Dashboard", layout="wide")
 
     # Authentication
     authenticated = authenticate_user()
@@ -16,7 +16,7 @@ def main():
         logout_user()
         st.stop()
 
-    st.header("Importer Dashboard 360°")
+    st.header("Importer Dashboard")
     st.subheader("Upload Your Data")
 
     # File Upload
@@ -31,14 +31,14 @@ def main():
             st.subheader("Dataset Preview")
             st.write(data.head())
 
-            # Sidebar: Dashboard Navigation
+            # Dashboard Navigation
             st.sidebar.title("Dashboard Navigation")
             dashboard = st.sidebar.radio(
                 "Select Dashboard",
                 ("Market Overview",)
             )
 
-            # Dashboard Routing
+            # Navigate to Selected Dashboard
             if dashboard == "Market Overview":
                 market_overview(data)
 
