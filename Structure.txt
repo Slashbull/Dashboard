@@ -1,9 +1,11 @@
 importer_dashboard/
 ├── app.py
 ├── core/
+│   ├── __init__.py
 │   ├── core.py
 │   ├── security.py
 ├── submodules/
+│   ├── __init__.py
 │   └── anomaly_detection.py
-├── data/              # (optional) place CSV/Excel files here
-└── requirements.txt
+├── requirements.txt
+└── data/              # (Optional) place sample CSV/Excel files here
