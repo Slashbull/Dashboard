@@ -1,15 +1,8 @@
-# importer_dashboard/app.py
-
 import streamlit as st
 from core.core import load_and_preprocess_data
 from core.security import authenticate_user, logout_user
 from submodules.anomaly_detection import detect_anomalies
 import plotly.express as px
-
-import sys
-
-st.write("Python executable being used:", sys.executable)
-st.write("Python version:", sys.version)
 
 def main():
     st.set_page_config(page_title="Importer Dashboard 360°", layout="wide")
@@ -66,20 +59,20 @@ def main():
             col1.metric("Total Imports (Kg)", f"{total_imports:,.2f}")
             col2.metric("States Involved", unique_states)
 
-            # 7. Optional: Anomaly Detection
+            # 7. Anomaly Detection
             st.subheader("Anomaly Detection")
             if st.checkbox("Run Anomaly Detection"):
-                anomalies = detect_anomalies(filtered_data)
+                anomalies = detect_anomalies(filtered_data, column="Quantity", method="iqr")  # Choose "iqr" or "zscore"
                 st.write(anomalies[anomalies["is_anomaly"]])
 
-                # Anomaly Chart
-                if "Month" in anomalies.columns and "Quantity" in anomalies.columns:
+                # Visualization
+                if "State" in anomalies.columns and "Quantity" in anomalies.columns:
                     fig = px.scatter(
-                        anomalies, 
-                        x="Month", 
-                        y="Quantity", 
-                        color="is_anomaly", 
-                        title="Quantity by Month with Anomalies Highlighted"
+                        anomalies,
+                        x="State",
+                        y="Quantity",
+                        color="is_anomaly",
+                        title="Quantity by State with Anomalies Highlighted",
                     )
                     st.plotly_chart(fig, use_container_width=True)
 
@@ -88,11 +81,11 @@ def main():
             if "State" in filtered_data.columns and "Quantity" in filtered_data.columns:
                 state_sums = filtered_data.groupby("State", as_index=False)["Quantity"].sum()
                 fig_bar = px.bar(
-                    state_sums, 
-                    x="State", 
-                    y="Quantity", 
+                    state_sums,
+                    x="State",
+                    y="Quantity",
                     title="Total Imports by State",
-                    labels={"State": "State", "Quantity": "Quantity (Kg)"}
+                    labels={"State": "State", "Quantity": "Quantity (Kg)"},
                 )
                 st.plotly_chart(fig_bar, use_container_width=True)
 
