@@ -28,6 +28,13 @@ def load_and_preprocess_data(file=None, google_sheet_url=None):
         else:
             raise ValueError("No file or link provided.")
 
+        # Print out columns for debugging
+        st.write("Columns in data:", data.columns)
+
+        # Clean the column names (strip spaces, handle case inconsistencies)
+        data.columns = data.columns.str.strip()  # Strip any leading/trailing spaces
+        data.columns = data.columns.str.title()  # Convert column names to title case (e.g., "Month" instead of "month")
+
         # Preprocessing data (cleaning and formatting)
         data["Month"] = data["Month"].str.strip().str.title()  # Standardizing month format
         data["Quarter"] = data["Month"].map({
