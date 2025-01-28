@@ -51,10 +51,12 @@ def load_and_preprocess_data(file=None, google_sheet_url=None):
 
         # Clean the Quantity column
         if 'Quantity' in data.columns:
+            # Remove non-numeric characters (e.g., '-', ',', ' Kgs')
             data['Quantity'] = (
                 data['Quantity']
-                .replace(',', '', regex=True)  # Remove commas
-                .replace(" Kgs", "", regex=True)  # Remove " Kgs"
+                .astype(str)  # Ensure it's a string
+                .str.replace('[^0-9.]', '', regex=True)  # Remove all non-numeric characters
+                .replace('', '0')  # Replace empty strings with '0'
                 .astype(float)  # Convert to float
             )
 
