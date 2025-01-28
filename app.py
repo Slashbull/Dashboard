@@ -1,15 +1,19 @@
-
 import streamlit as st
 from core.core import load_and_preprocess_data
-from core.security import authenticate_user
+from core.security import authenticate_user, logout_user
 
 def main():
     # Authentication
     authenticated = authenticate_user()
     if not authenticated:
+        return  # Stop app if not authenticated
+
+    # Logout button
+    if st.sidebar.button("Logout"):
+        logout_user()
         return
 
-    # Header
+    # Main app content after authentication
     st.header("Importer Dashboard")
     st.subheader("Upload Your Data")
 
