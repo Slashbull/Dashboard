@@ -4,6 +4,7 @@ import streamlit as st
 from core.core import load_and_preprocess_data
 from core.security import authenticate_user, logout_user
 from submodules.anomaly_detection import detect_anomalies
+
 import plotly.express as px
 
 def main():
