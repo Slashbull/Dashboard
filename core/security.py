@@ -1,8 +1,9 @@
 import streamlit as st
+import hashlib
 
 USER_CREDENTIALS = {
-    "admin": "password123",
-    "user": "userpass"
+    "admin": hashlib.sha256("password123".encode()).hexdigest(),
+    "user": hashlib.sha256("userpass".encode()).hexdigest()
 }
 
 def authenticate_user():
@@ -11,7 +12,8 @@ def authenticate_user():
     password = st.sidebar.text_input("Password", type="password", key="password")
 
     if st.sidebar.button("Login"):
-        if username in USER_CREDENTIALS and USER_CREDENTIALS[username] == password:
+        hashed_password = hashlib.sha256(password.encode()).hexdigest()
+        if username in USER_CREDENTIALS and USER_CREDENTIALS[username] == hashed_password:
             st.session_state["authenticated"] = True
             st.sidebar.success("Login successful!")
             return True
@@ -23,4 +25,4 @@ def authenticate_user():
 
 def logout_user():
     st.session_state["authenticated"] = False
-    st.sidebar.info("Logged out.")
+    st.sidebar.info("You have been logged out.")
