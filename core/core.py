@@ -1,5 +1,3 @@
-# importer_dashboard/core/core.py
-
 import pandas as pd
 import streamlit as st
 
