@@ -16,7 +16,7 @@ def main():
         logout_user()
         st.stop()
 
-    st.header("Importer Dashboard")
+    st.title("Importer Dashboard")
     st.subheader("Upload Your Data")
 
     # File Upload
@@ -31,14 +31,14 @@ def main():
             st.subheader("Dataset Preview")
             st.write(data.head())
 
-            # Dashboard Navigation
+            # Sidebar Navigation
             st.sidebar.title("Dashboard Navigation")
             dashboard = st.sidebar.radio(
                 "Select Dashboard",
                 ("Market Overview",)
             )
 
-            # Navigate to Selected Dashboard
+            # Dashboard Routing
             if dashboard == "Market Overview":
                 market_overview(data)
 
