@@ -1,10 +1,8 @@
 import streamlit as st
 import pandas as pd
 import chardet
-from core.core import load_and_preprocess_data
-from core.security import authenticate_user, logout_user
 
-# Function to handle file loading, preprocessing and data transformations
+# Function to handle file loading, preprocessing, and data transformations
 def load_and_preprocess_data(file=None, google_sheet_url=None):
     try:
         # If file is uploaded
@@ -28,26 +26,22 @@ def load_and_preprocess_data(file=None, google_sheet_url=None):
         else:
             raise ValueError("No file or link provided.")
 
-        # Print out columns for debugging
-        st.write("Columns in the dataset:", data.columns.tolist())
-
         # Clean the column names (strip spaces, handle case inconsistencies)
         data.columns = data.columns.str.strip()  # Strip any leading/trailing spaces
-        data.columns = data.columns.str.title()  # Convert column names to title case (e.g., "Month" instead of "month")
-
-        # Check the columns after cleaning
-        st.write("Cleaned columns:", data.columns.tolist())
+        data.columns = data.columns.str.title()  # Convert column names to title case (e.g., "Month")
 
         # Preprocessing data (cleaning and formatting)
-        data["Month"] = data["Month"].str.strip().str.title()  # Standardizing month format
-        data["Quarter"] = data["Month"].map({
-            "Jan": "Q1", "Feb": "Q1", "Mar": "Q1",
-            "Apr": "Q2", "May": "Q2", "Jun": "Q2",
-            "Jul": "Q3", "Aug": "Q3", "Sep": "Q3",
-            "Oct": "Q4", "Nov": "Q4", "Dec": "Q4"
-        })  # Add Quarter column
-
-        data["Quantity"] = data["Quantity"].replace(" Kgs", "", regex=True).astype(float)  # Clean Quantity column
+        if "Month" in data.columns:
+            data["Month"] = data["Month"].str.strip().str.title()  # Standardizing month format
+            # Map months to quarters
+            data["Quarter"] = data["Month"].map({
+                "Jan": "Q1", "Feb": "Q1", "Mar": "Q1",
+                "Apr": "Q2", "May": "Q2", "Jun": "Q2",
+                "Jul": "Q3", "Aug": "Q3", "Sep": "Q3",
+                "Oct": "Q4", "Nov": "Q4", "Dec": "Q4"
+            })
+        if "Quantity" in data.columns:
+            data["Quantity"] = data["Quantity"].replace(" Kgs", "", regex=True).astype(float)  # Clean Quantity column
 
         return data
     except pd.errors.ParserError as e:
@@ -57,18 +51,8 @@ def load_and_preprocess_data(file=None, google_sheet_url=None):
 
 
 def main():
-    # Authentication
-    authenticated = authenticate_user()
-    if not authenticated:
-        return  # Stop app if not authenticated
-
-    # Logout button
-    if st.sidebar.button("Logout"):
-        logout_user()
-        return
-
-    # Main app content after authentication
-    st.header("Importer Dashboard 360°")
+    st.set_page_config(page_title="Importer Dashboard", layout="wide")
+    st.title("Importer Dashboard 360°")
     st.subheader("Upload Your Data")
 
     # Data upload options
@@ -86,7 +70,7 @@ def main():
             st.write(data.head())
 
             # Filter options (State, Consignee, Month, Year)
-            st.sidebar.subheader("Filter Options")
+            st.sidebar.header("Filter Options")
             states = data["Consignee State"].unique()
             selected_state = st.sidebar.selectbox("Select State", ["All"] + list(states))
 
@@ -96,7 +80,7 @@ def main():
             months = data["Month"].unique()
             selected_month = st.sidebar.selectbox("Select Month", ["All"] + list(months))
 
-            years = data["Year"].unique()
+            years = data["Year"].unique() if "Year" in data.columns else []
             selected_year = st.sidebar.selectbox("Select Year", ["All"] + list(years))
 
             # Apply filters based on user selection
@@ -124,6 +108,7 @@ def main():
             st.error(f"Error: {e}")
     else:
         st.info("Please upload a file or provide a Google Sheet link to proceed.")
+
 
 if __name__ == "__main__":
     main()
