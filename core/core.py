@@ -2,7 +2,7 @@ import pandas as pd
 
 def load_and_preprocess_data(file=None, google_sheet_url=None):
     """
-    Load and preprocess data from a file or Google Sheet.
+    Load and preprocess data for the Importer Dashboard.
     """
     try:
         if file:
@@ -36,4 +36,4 @@ def load_and_preprocess_data(file=None, google_sheet_url=None):
 
         return df
     except Exception as e:
-        raise ValueError(f"Error loading/preprocessing data: {e}")
+        raise ValueError(f"Error during data preprocessing: {e}")
