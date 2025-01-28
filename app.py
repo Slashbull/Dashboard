@@ -89,6 +89,14 @@ def main():
                 )
                 st.plotly_chart(fig_bar, use_container_width=True)
 
+            # 9. Download Filtered Data
+            st.download_button(
+                label="Download Filtered Data as CSV",
+                data=filtered_data.to_csv(index=False),
+                file_name="filtered_data.csv",
+                mime="text/csv",
+            )
+
         except Exception as e:
             st.error(f"Error: {e}")
     else:
