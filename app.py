@@ -1,25 +1,32 @@
 # importer_dashboard/app.py
 
 import streamlit as st
-
-# COMMENTED OUT for Step 1:
-# from core.core import load_and_preprocess_data
-# from core.security import authenticate_user, logout_user
+from core.core import load_and_preprocess_data
 
 def main():
     st.set_page_config(page_title="Importer Dashboard 360°", layout="wide")
 
-    # COMMENTED OUT for Step 1:
-    # authenticated = authenticate_user()
-    # if not authenticated:
-    #     st.stop()
+    st.header("Importer Dashboard 360° - Step 2")
+    st.subheader("Upload Your Data")
 
-    # if st.sidebar.button("Logout"):
-    #     logout_user()
-    #     st.stop()
+    # Data upload options
+    file = st.file_uploader("Upload a CSV or Excel file", type=["csv", "xls", "xlsx"])
+    google_sheet_url = st.text_input("Or provide a Google Sheet link:")
 
-    st.header("Importer Dashboard 360° - Step 1")
-    st.write("This is our minimal starting point. We'll add data uploads, filters, and authentication in the next steps.")
+    # If user provides a file or Google Sheet URL
+    if file or google_sheet_url:
+        try:
+            # Load and preprocess data
+            df = load_and_preprocess_data(file=file, google_sheet_url=google_sheet_url)
+            st.success("Data loaded and preprocessed successfully!")
+
+            # Show a preview
+            st.subheader("Data Preview")
+            st.write(df.head())
+        except Exception as e:
+            st.error(f"Error: {e}")
+    else:
+        st.info("Please upload a file or provide a Google Sheet link to proceed.")
 
 if __name__ == "__main__":
     main()
