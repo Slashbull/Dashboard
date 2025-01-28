@@ -8,7 +8,7 @@ import plotly.express as px
 
 import sys
 
-st.write("Python executable:", sys.executable)
+st.write("Python executable being used:", sys.executable)
 st.write("Python version:", sys.version)
 
 def main():
