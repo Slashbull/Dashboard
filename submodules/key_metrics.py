@@ -1,7 +1,4 @@
 def calculate_kpis(data):
-    if data.empty:
-        return 0, 0, 0, 0
-
     total_imports = data["Quantity"].sum()
     unique_states = data["State"].nunique()
 
