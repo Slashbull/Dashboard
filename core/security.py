@@ -3,14 +3,12 @@
 import streamlit as st
 
 USER_CREDENTIALS = {
-    "admin": "password123",  # Example
+    "admin": "password123",
     "user": "userpass"
 }
 
 def authenticate_user():
-    """Display a login form and authenticate the user."""
     st.sidebar.title("Login")
-
     username = st.sidebar.text_input("Username", key="username")
     password = st.sidebar.text_input("Password", type="password", key="password")
 
@@ -20,16 +18,11 @@ def authenticate_user():
             st.sidebar.success("Login successful!")
             return True
         else:
-            st.sidebar.error("Invalid username or password.")
+            st.sidebar.error("Invalid credentials.")
             return False
-    
-    # If already authenticated this session
-    if "authenticated" in st.session_state and st.session_state["authenticated"]:
-        return True
-    
-    return False
+
+    return st.session_state.get("authenticated", False)
 
 def logout_user():
-    """Log out the current user."""
     st.session_state["authenticated"] = False
-    st.sidebar.info("You have been logged out.")
+    st.sidebar.info("Logged out.")
