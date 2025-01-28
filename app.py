@@ -1,9 +1,9 @@
 import streamlit as st
 from core.core import load_and_preprocess_data
 from core.security import authenticate_user, logout_user
-from submodules.anomaly_detection import detect_anomalies
+from core.filters import apply_filters, generate_filter_options, get_active_filters
+from submodules.key_metrics import calculate_kpis
 import plotly.express as px
-import pandas as pd
 import datetime
 
 def main():
@@ -30,24 +30,32 @@ def main():
             # Load and preprocess data
             data = load_and_preprocess_data(file=file, google_sheet_url=google_sheet_url)
             st.success("Data loaded successfully!")
+            st.subheader("Dataset Preview")
             st.write(data.head())
 
-            # Filters
+            # Sidebar Filters
             st.sidebar.subheader("Filter Options")
-            filtered_data = data.copy()
 
-            # Multi-select Filters
-            selected_states = st.sidebar.multiselect("Select States", ["All"] + sorted(data["State"].dropna().unique()))
-            selected_exporters = st.sidebar.multiselect("Select Exporters", ["All"] + sorted(data["Exporter"].dropna().unique()))
-            selected_consignees = st.sidebar.multiselect("Select Consignees", ["All"] + sorted(data["Consignee"].dropna().unique()))
+            # Generate Filter Options
+            columns = ["Quarter", "Month", "Year", "State", "Consignee", "Exporter"]
+            filter_options = generate_filter_options(data, columns)
+
+            # Filter Selection
+            filters = {}
+            for column in columns:
+                if column in ["State", "Consignee", "Exporter"]:  # Multi-select filters
+                    filters[column] = st.sidebar.multiselect(f"Select {column}", filter_options[column])
+                else:  # Single-select filters
+                    filters[column] = st.sidebar.selectbox(f"Select {column}", filter_options[column])
 
             # Apply Filters
-            if selected_states and "All" not in selected_states:
-                filtered_data = filtered_data[filtered_data["State"].isin(selected_states)]
-            if selected_exporters and "All" not in selected_exporters:
-                filtered_data = filtered_data[filtered_data["Exporter"].isin(selected_exporters)]
-            if selected_consignees and "All" not in selected_consignees:
-                filtered_data = filtered_data[filtered_data["Consignee"].isin(selected_consignees)]
+            filtered_data = apply_filters(data, filters)
+
+            # Active Filters Summary
+            active_filters = get_active_filters(filters)
+            st.sidebar.write("**Active Filters**:")
+            for key, value in active_filters.items():
+                st.sidebar.write(f"{key}: {', '.join(value) if isinstance(value, list) else value}")
 
             # Display Filtered Data
             if filtered_data.empty:
@@ -56,16 +64,16 @@ def main():
                 st.subheader("Filtered Data")
                 st.write(filtered_data)
 
-                # KPIs
-                total_imports = filtered_data["Quantity"].sum() if "Quantity" in filtered_data.columns else 0
-                unique_states = filtered_data["State"].nunique() if "State" in filtered_data.columns else 0
+                # KPI Metrics
+                total_imports, unique_states, yoy_growth, mom_growth = calculate_kpis(filtered_data)
 
-                col1, col2 = st.columns(2)
+                col1, col2, col3, col4 = st.columns(4)
                 col1.metric("Total Imports (Kg)", f"{total_imports:,.2f}")
                 col2.metric("States Involved", unique_states)
+                col3.metric("YoY Growth (%)", f"{yoy_growth:.2f}")
+                col4.metric("MoM Growth (%)", f"{mom_growth:.2f}")
 
-                # Quarterly Trends
-                st.subheader("Quarterly Trends")
+                # Visualization: Quarterly Trends
                 if "Quarter" in filtered_data.columns and "Quantity" in filtered_data.columns:
                     quarter_trends = filtered_data.groupby("Quarter", as_index=False)["Quantity"].sum()
                     fig_quarter = px.bar(
@@ -76,33 +84,6 @@ def main():
                         labels={"Quarter": "Quarter", "Quantity": "Quantity (Kg)"}
                     )
                     st.plotly_chart(fig_quarter, use_container_width=True)
-
-                # Anomaly Detection
-                st.subheader("Anomaly Detection")
-                anomalies = detect_anomalies(filtered_data, column="Quantity", method="iqr")
-                st.write(anomalies[anomalies["is_anomaly"]])
-
-                # Exporter Contributions
-                exporter_contributions = filtered_data.groupby("Exporter", as_index=False)["Quantity"].sum()
-                fig_exporter = px.bar(
-                    exporter_contributions,
-                    x="Exporter",
-                    y="Quantity",
-                    title="Exporter Contributions",
-                    labels={"Quantity": "Total Imports (Kg)", "Exporter": "Exporter"},
-                )
-                st.plotly_chart(fig_exporter, use_container_width=True)
-
-                # Consignee Contributions
-                consignee_contributions = filtered_data.groupby("Consignee", as_index=False)["Quantity"].sum()
-                fig_consignee = px.bar(
-                    consignee_contributions,
-                    x="Consignee",
-                    y="Quantity",
-                    title="Consignee Contributions",
-                    labels={"Quantity": "Total Imports (Kg)", "Consignee": "Consignee"},
-                )
-                st.plotly_chart(fig_consignee, use_container_width=True)
 
         except Exception as e:
             st.error(f"Error: {e}")
